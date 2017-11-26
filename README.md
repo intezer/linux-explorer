@@ -4,12 +4,13 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 ## Capabilities
 ### ps
 * View full process list
+* Inspect process memory map & fetch memory strings easly
 * Dump process memory in one click
-* Get memory strings easly
 * Automaticly search hash in public services
   * [VirusTotal](https://www.virustotal.com/#/home/upload)
   * [AlienVault OTX](https://otx.alienvault.com/)
 ### users
+* users list
 ### find
 * Search for suspicious files by name/regex
 ### netstat
@@ -23,6 +24,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 * chkrootkit
 ### yara
 * Scan a file or directory using YARA signatures by @Neo23x0
+* Scan a running process memory address space
 * Upload your own YARA signature
   
 ## Requirements
