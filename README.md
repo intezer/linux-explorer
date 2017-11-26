@@ -35,7 +35,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 ## Installation
 1. Clone repository
 ```sh
-git clone https://github.com/intezer/linux_explorer
+git clone https://github.com/intezer/linux_expl0rer
 ```
 
 2. Install required packages
