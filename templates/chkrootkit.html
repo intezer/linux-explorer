@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <script type="application/javascript">
+
+        $(document).ready(function () {
+
+            setInterval(update_status, 1000);
+            update_status();
+
+            setInterval(update_results, 1000);
+            update_results();
+
+        });
+
+        function update_status() {
+            $.get('/tools/chkrootkit/status', function(data, status) {
+                if (data == 'not started') {
+                    $('#status').html('<span class="lbl gray">' + data + '</span>');
+
+                    $('#btn_start').show();
+                    $('#btn_stop').hide();
+
+                } else if (data == 'running') {
+                    $('#status').html('<span class="lbl red">' + data + '</span>');
+
+                    $('#btn_start').hide();
+                    $('#btn_stop').show();
+                } else {
+                    $('#status').html('<span class="lbl green">' + data + '</span>');
+
+                    $('#btn_start').show();
+                    $('#btn_stop').hide();
+                }
+
+            });
+        };
+
+        function update_results() {
+            $.get('/tools/chkrootkit/results', function(data, status) {
+                $('#results').html(data.replace(/\n/g,'<br>'));
+            });
+        };
+
+        function start_scan() {
+            $.get('/tools/chkrootkit/run', function(data, status) {
+                console.log(status);
+            });
+        };
+
+        function stop_scan() {
+            $.get('/tools/chkrootkit/stop', function(data, status) {
+                console.log(status);
+            });
+        };
+
+    </script>
+
+{% endblock %}
+
+{% block body %}
+
+    STATUS: <a id="status">-</a><div id="btn_start" style="float:right;"><button onclick="start_scan()">START</button></div><div id="btn_stop" style="float:right;"><button onclick="stop_scan()">STOP</button></div><br><br>
+
+    <div id="results"></div>
+
+{% endblock %}

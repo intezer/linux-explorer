@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <script type="application/javascript">
+
+        $(document).ready(function () {
+
+            $('.ps_list_hidden').hide();
+
+            $('#scan_type_loaded_modules').click(function () {
+                $('.ps_list_hidden').show();
+                $('.disk_path_hidden').hide();
+            });
+
+            $('#scan_type_disk_path').click(function () {
+                $('.ps_list_hidden').hide();
+                $('.disk_path_hidden').show();
+            });
+
+            $('#scan').submit( function(event) {
+                event.preventDefault();
+
+                var form = serialize_dictionary($(this).serializeArray());
+                console.log(form);
+
+                if (form['scan_type'] == 'disk_path') {
+                    $.get('/tools/yara/run', {'rules_file': form['ruleset_file'], 'dir': form['disk_path'], 'recursive': form['cb_recursive'] == 'on'}, function(data, status) {
+                        console.log(status);
+                    });
+                } else {
+                    $.get('/tools/yara/run', {'rules_file': form['ruleset_file'], 'pid': form['ps_list']}, function(data, status) {
+                        console.log(status);
+                    });
+                };
+            });
+
+            // get yara scan status
+            setInterval(update_status, 1000);
+            update_status();
+
+            // get yara scan results
+            setInterval(update_results, 1000);
+            update_results();
+
+            $.get('/processes/list', function(data, status) {
+                $.each(data['data'], function(i, item) {
+                    $('#ps_list').append($('<option>', {
+                        value: item['pid'],
+                        text: item['pid'] + ' (' + item['name'] + ')'
+                    }));
+                });
+            });
+
+        });
+
+        function serialize_dictionary(list) {
+            var dict = {};
+            console.log(list);
+            for (var i = 0; i < list.length; ++i) {
+                    dict[list[i].name] = list[i].value
+                }
+            return dict;
+        };
+
+        function update_status() {
+            $.get('/tools/yara/status', function(data, status) {
+                if (data == 'not started') {
+                    $('#status').html('<span class="lbl gray">' + data + '</span>');
+                    $('#btn_stop').hide();
+                } else if (data == 'running') {
+                    $('#status').html('<span class="lbl yellow">' + data + '</span>');
+                    $('#btn_stop').show();
+                } else {
+                    $('#status').html('<span class="lbl green">' + data + '</span>');
+                    $('#btn_stop').hide();
+                }
+
+            });
+        };
+
+        function update_results() {
+            $.get('/tools/yara/results', function(data, status) {
+                $('#results').html(data.replace(/\n/g,'<br>'));
+            });
+        };
+
+        function stop_scan() {
+            $.get('/tools/yara/stop', function(data, status) {
+                console.log(status);
+            });
+        };
+
+    </script>
+
+    <style>
+
+        textarea {
+            height: 400px;
+            max-height: 400px;
+            width:100%;
+            resize: none;
+            border: 0px;
+            overflow:auto;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block body %}
+
+    <form id="scan">
+        <input type="radio" name="scan_type" id="scan_type_loaded_modules" value="loaded_modules"> pid<br>
+        <div class="ps_list_hidden">
+            <p>
+                <select name="ps_list" id="ps_list">
+                </select>
+            </p>
+        </div><br>
+
+        <input type="radio" name="scan_type" id="scan_type_disk_path" value="disk_path" checked> file or directory<br>
+
+        <div class="disk_path_hidden">
+            <p>
+                path: <input type="text" name="disk_path" id="tb_hidden" maxlength="256" value="/"><input type="checkbox" name="cb_recursive" checked> scan recursive?
+            </p>
+        </div><br>
+
+        Ruleset:
+        <select name="ruleset_file">
+            {% for ruleset in ruleset_files %}
+                <option value="{{ ruleset }}">{{ ruleset }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="submit" value="scan...">
+
+    </form><br>
+
+    <div>
+        <form action="/yara/upload" method="POST" enctype="multipart/form-data">
+             <b>add new yara rule file:</b>&nbsp&nbsp&nbsp&nbsp<input type="file" name="file" accept=".yar,.yara"/><input type="submit" value="upload..."/>
+        </form>
+    </div><br>
+
+    STATUS: <a id="status">-</a><div id="btn_stop" style="float:right;"><button onclick="stop_scan()">STOP</button></div><br><br>
+
+    <div id="results"></div>
+
+{% endblock %}

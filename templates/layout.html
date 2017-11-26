@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>Linux Expl0rer</title>
+
+    <!-- font -->
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
+
+    <!-- css -->
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- datatables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jq-3.2.1/jq-3.2.1/dt-1.10.16/datatables.min.css"/>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jq-3.2.1/jq-3.2.1/dt-1.10.16/datatables.min.js"></script>
+
+    <!-- js -->
+    <script type="text/javascript" src="{{url_for('static', filename='script.js')}}"></script>
+
+    <!-- layout specific -->
+    {% block head %}{% endblock %}
+
+</head>
+
+<body id="{{ request.path.replace('/', '_') }}">
+
+<header>
+
+    <div class="logo_box"><a class="no_link" href="http://github.com" target="_blank">Linux Expl0rer</a></div>
+
+    <nav>
+
+        <ul>
+
+            <li id="nav_processes"><a href="/processes">ps</a></li>
+            <li id="nav_users"><a href="/users">users</a></li>
+            <li id="nav_files"><a href="/files">find</a></li>
+            <li id="nav_netstat"><a href="/netstat">netstat</a></li>
+
+            <li id="nav_logs" class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">logs</a>
+                <div class="dropdown-content">
+                    <a href="/logs/syslog">syslog</a><br>
+                    <a href="/logs/auth">auth.log</a><br>
+                    <a href="/logs/ufw">ufw.log(firewall)</a><br>
+                    <a href="/logs/bash">bash history</a>
+                </div>
+            </li>
+
+            <li id="nav_anti_rootkit" class="dropdown">
+                <a href="javascript:void(0)" class="dropbtn">anti-rootkit</a>
+                <div class="dropdown-content">
+                    <a href="/chkrootkit">chkrootkit</a><br>
+                </div>
+            </li>
+
+            <li id="nav_yara"><a href="/yara">yara</a></li>
+
+        </ul>
+
+    </nav>
+
+</header>
+
+<div class="content">
+    {% block body %} {% endblock %}
+</div>
+
+</body>
+
+</html>

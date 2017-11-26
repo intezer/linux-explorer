@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <script type="application/javascript">
+
+        $(document).ready(function () {
+
+            $('#search').submit( function(event) {
+                event.preventDefault();
+
+                var form = serialize_dictionary($(this).serializeArray());
+                console.log(form);
+
+                $.get('/tools/find/run', { 'dir': form['dir'], 'name': form['name'] }, function(data, status) {
+                    console.log(status);
+                });
+
+            });
+
+            setInterval(update_status, 1000);
+            update_status();
+
+            setInterval(update_results, 1000);
+            update_results();
+        });
+
+        function serialize_dictionary(list) {
+            var dict = {};
+            console.log(list);
+            for (var i = 0; i < list.length; ++i) {
+                    dict[list[i].name] = list[i].value
+                }
+            return dict;
+        };
+
+        function update_status() {
+            $.get('/tools/find/status', function(data, status) {
+                if (data == 'not started') {
+                    $('#status').html('<span class="lbl gray">' + data + '</span>');
+                    $('#btn_stop').hide();
+                } else if (data == 'running') {
+                    $('#status').html('<span class="lbl yellow">' + data + '</span>');
+                    $('#btn_stop').show();
+                } else {
+                    $('#status').html('<span class="lbl green">' + data + '</span>');
+                    $('#btn_stop').hide();
+                }
+
+            });
+        };
+
+        function update_results() {
+            $.get('/tools/find/results', function(data, status) {
+                $('#results').html(data.replace(/\n/g,'<br>'));
+            });
+        };
+
+        function stop_scan() {
+            $.get('/tools/find/stop', function(data, status) {
+                console.log(status);
+            });
+        };
+
+    </script>
+
+{% endblock %}
+
+{% block body %}
+
+    <form id="search">
+
+        dir: <input type="text" name="dir" maxlength="256" value="/"> name: <input type="text" name="name" maxlength="256"> <i>(use '*' as wildcard)</i> <input type="submit" value="search...">
+
+    </form><br>
+
+    STATUS: <a id="status">-</a><div id="btn_stop" style="float:right;"><button onclick="stop_scan()">STOP</button></div><br><br>
+
+    <div id="results"></textarea>
+
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <script type="application/javascript">
+
+        $(document).ready(function() {
+
+            var table = $('#tbl_netstat').DataTable( {
+                "ajax": "/netstat/raw",
+                "columns": [
+                    { "data": "pid" },
+                    { "data": "laddr",
+                      "render": function(data, type, row ) {
+                            return data["ip"] + ":" + data["port"];
+                            }
+                        },
+                    { "data": "raddr",
+                        "render": function(data, type, row ) {
+                                if(!("ip" in data)) {
+                                    return "-";
+                                }
+                                return "<a href=\"https://www.whois.com/whois/" + data["ip"] + "\" target=\"_blank\">" + data["ip"] + ":" + data["port"] + "</a>";
+                            }
+                        },
+                    { "data": "status" },
+                    { "data": "type" },
+                    { "data": "fd" },
+                    { "data": "family" }
+                ],
+                "order": [[0, 'asc']],
+                "bPaginate": false
+            } );
+        });
+
+    </script>
+
+{% endblock %}
+
+{% block body %}
+
+    <table id="tbl_netstat" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>pid</th>
+                <th>laddr</th>
+                <th>raddr</th>
+                <th>status</th>
+                <th>type</th>
+                <th>fd</th>
+                <th>family</th>
+            </tr>
+        </thead>
+    </table>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <script type="application/javascript">
+
+        $(document).ready(function() {
+            $('#tbl_users').DataTable( {
+                'ajax': '/users/list',
+                "bPaginate": false
+            });
+        });
+
+    </script>
+    <style></style>
+
+{% endblock %}
+
+{% block body %}
+
+    <table id="tbl_users" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>login name</th>
+                <th>password</th>
+                <th>uid</th>
+                <th>gid</th>
+                <th>user name</th>
+                <th>home dir</th>
+                <th>interpreter</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>login name</th>
+                <th>password</th>
+                <th>uid</th>
+                <th>gid</th>
+                <th>user name</th>
+                <th>home dir</th>
+                <th>interpreter</th>
+            </tr>
+        </tfoot>
+    </table>
+
+{% endblock %}

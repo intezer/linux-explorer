@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <style>
+
+        textarea {
+            height: 750px;
+            max-height: 750px;
+            width:100%;
+            resize: none;
+            border: 0px;
+            overflow:auto;
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block body %}
+
+{% autoescape false %}
+    {{ text.replace(' ', '&nbsp').replace('\r\n','\n').replace('\n','<br>') }}
+{% endautoescape %}
+
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <script type="application/javascript">
+
+        function format ( d ) {
+
+            hash(d.exe, function(md5, sha256) {
+
+                $('#md5_' + d.pid).html(md5);
+                $('#sha256_' + d.pid).html(sha256);
+
+                $('#vt_' + d.pid).html("searching...");
+                $('#otx_' + d.pid).html("searching...");
+
+                /* --- Search in VirusTotal and OTX --- */
+                VT_search(sha256, function(data) {
+                    if (data['response_code'] == 1) {
+                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + hash + "\" target=\"_blank\">report (" + data["positives"] + "/" + data["total"] + ")</a>");
+                    } else {
+                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + hash + "\" target=\"_blank\">not found</a>");
+                    }
+                });
+
+                OTX_pulses("FileHash-SHA256", sha256, function(results) {
+                    var arr = $.map(results, function(val, i) {
+                        return OTX_link(val);
+                    });
+
+                    if (arr.length > 0) {
+                        $("#otx_" + d.pid).html(arr.join(","));
+                    } else {
+                        $("#otx_" + d.pid).html("no pulse found");
+                    }
+                }, function(error_str) {
+                    $("#otx_" + d.pid).html(error_str);
+                });
+            });
+
+            // create html table from connections list
+            var connections_html = '';
+
+            for(i=0; d.connections[i]; i++) {
+                connections_html += '<tr><td>' + d.connections[i][3].join(':') + '</td><td>' + d.connections[i][4].join(':') + '</td><td>' + d.connections[i][5] + '</td></tr>';
+            }
+
+            if (!connections_html.length) {
+                connections_html = '<tr><td>-</td><td>-</td><td>-</td></tr>';
+            }
+
+            // move this to function
+            $.get('/processes/' + d.pid + '/memory_map', function(data, status) {
+                for(i=0; data['data'][i]; i++) {
+                    addr = data['data'][i].addr.split('-');
+
+                    $('#memory_map_pid_' + d.pid + ' tr:last').after('<tr><td>' + data['data'][i].addr + '</td><td>' + data['data'][i].perms + '</td><td>' + data['data'][i].size + '</td><td>' + data['data'][i].path + '</td><td><a href="/mem/' + d.pid + '/strings?start=' + addr[0] + '&end=' + addr[1] + '">strings</a></td></tr>');
+                }
+            });
+
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                       '<tr>'+
+                           '<td>pid:</td>'+
+                           '<td>'+d.pid+'</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>ppid:</td>'+
+                           '<td>'+d.ppid+'</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>username:</td>'+
+                           '<td>'+d.username+'</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>name:</td>'+
+                           '<td>'+d.name+'</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>exe:</td>'+
+                           '<td>'+d.exe+' | <a href="/fs/download?path=' + d.exe + '">download</a></td>'+
+                       '<tr>'+
+                           '<td>VirusTotal:</td>'+
+                           '<td id="vt_' + d.pid + '">-</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>AlienVault OTX:</td>'+
+                           '<td id="otx_' + d.pid + '">-</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>md5:</td>'+
+                           '<td id="md5_' + d.pid + '">calculating hash...</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>sha256:</td>'+
+                           '<td id="sha256_' + d.pid + '">calculating hash...</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>cmdline:</td>'+
+                           '<td>'+d.cmdline.join(" ")+'</td>'+
+                       '</tr>'+
+                       '<tr>'+
+                           '<td>gcore:</td>'+
+                           '<td><a href="/processes/' + d.pid + '/core_file">dump process</a></td>'+
+                       '</tr>'+
+                   '</table><br>' +
+                   '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+                       '<thead>' +
+                           '<tr>' +
+                               '<th>laddr</th>' +
+                               '<th>raddr</th>' +
+                               '<th>status</th>' +
+                           '</tr>' +
+                       '</thead>' + connections_html +
+                   '</table><br>' +
+                   '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;" id="memory_map_pid_' + d.pid + '">'+
+                       '<thead>' +
+                           '<tr>' +
+                               '<th>addr</th>' +
+                               '<th>perms</th>' +
+                               '<th>size</th>' +
+                               '<th>path</th>' +
+                               '<th>-</th>' +
+                           '</tr>' +
+                       '</thead>' +
+                   '</table>';
+        }
+
+        $(document).ready(function() {
+
+            var table = $('#process_list').DataTable( {
+                "ajax": "/processes/list",
+                "columns": [
+                    { "data": "pid" },
+                    { "data": "ppid" },
+                    { "data": "username" },
+                    { "data": "name" },
+                    { "data": "exe" },
+                    { "data": "cmdline",
+                      "render": function(data, type, row ) {
+                            return data.join(' ');
+                            }
+                        },
+                ],
+                "order": [[1, 'asc']],
+                "bPaginate": false
+            } );
+
+            $('#process_list tbody').on('click', 'tr', function ()
+            {
+                var tr = $(this).closest('tr');
+                var row = table.row( tr );
+
+                if ( row.child.isShown() )
+                {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+                else
+                {
+                    // Open this row
+                    row.child( format(row.data()) ).show();
+                    tr.addClass('shown');
+               }
+            });
+        });
+
+    </script>
+
+    <style>
+        tr {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <table id="process_list" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>pid</th>
+                <th>ppid</th>
+                <th>username</th>
+                <th>name</th>
+                <th>exe</th>
+                <th>cmdline</th>
+            </tr>
+        </thead>
+    </table>
+
+{% endblock %}
