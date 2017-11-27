@@ -17,9 +17,9 @@
                 /* --- Search in VirusTotal and OTX --- */
                 VT_search(sha256, function(data) {
                     if (data['response_code'] == 1) {
-                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + hash + "\" target=\"_blank\">report (" + data["positives"] + "/" + data["total"] + ")</a>");
+                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + sha256 + "\" target=\"_blank\">report (" + data["positives"] + "/" + data["total"] + ")</a>");
                     } else {
-                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + hash + "\" target=\"_blank\">not found</a>");
+                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + sha256 + "\" target=\"_blank\">not found</a>");
                     }
                 });
 
