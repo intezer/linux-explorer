@@ -73,7 +73,7 @@ firefox http://127.0.0.1:8080
 ```
 2. do stuff
 
-**screenshot**
+![Alt Text](https://github.com/intezer/linux-explorer/raw/master/image.gif)
 
 ## Notes
 * We recommend using NGINX [reverse proxy with basic http auth](https://www.nginx.com/resources/admin-guide/restricting-access-auth-basic/) & ssl for secure remote access
