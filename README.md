@@ -1,6 +1,8 @@
 # Linux Expl0rer
 Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask.
 
+![Alt Text](https://github.com/intezer/linux-explorer/raw/master/image.gif)
+
 ## Capabilities
 ### ps
 * View full process list
@@ -72,8 +74,6 @@ sudo python linux_explorer.py
 firefox http://127.0.0.1:8080
 ```
 2. do stuff
-
-![Alt Text](https://github.com/intezer/linux-explorer/raw/master/image.gif)
 
 ## Notes
 * We recommend using NGINX [reverse proxy with basic http auth](https://www.nginx.com/resources/admin-guide/restricting-access-auth-basic/) & ssl for secure remote access
