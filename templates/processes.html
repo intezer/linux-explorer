@@ -42,7 +42,7 @@
             var connections_html = '';
 
             for(i=0; d.connections[i]; i++) {
-                connections_html += '<tr><td>' + d.connections[i][3].join(':') + '</td><td>' + d.connections[i][4].join(':') + '</td><td>' + d.connections[i][5] + '</td></tr>';
+                connections_html += '<tr><td>' + d.connections[i]['laddr']['ip'] + ':' + d.connections[i]['laddr']['port'] + '</td><td>' + d.connections[i]['raddr']['ip'] + ':' + d.connections[i]['raddr']['port'] + '</td><td>' + d.connections[i]['status'] + '</td></tr>';
             }
 
             if (!connections_html.length) {
