@@ -125,12 +125,16 @@ def otx_report(type, indicator):
 
     return jsonify(otx.get_indicator_details_full(find_by_type(type), indicator)), 200
 
-@app.route('/malshare/<string:type>/<string:indicator>')
-def malshare_report(type, indicator):
+@app.route('/malshare/<string:hash_>')
+def malshare_report(hash_):
     ''' MalShare repository.
-        Supported indicator types: "domain", "hostname", "URL", "FileHash-MD5", "FileHash-SHA1", "FileHash-SHA256", '''
+        Supported indicator types: "FileHash-MD5", "FileHash-SHA1", "FileHash-SHA256", '''
 
-    response = requests.get('https://malshare.com/api.php?api_key=%s&action=details&hash=%s' % ( config.MALSHARE_APIKEY, indicator ), headers={'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'gzip,  Linux Expl0rer'})
+    if not len(config.MALSHARE_APIKEY):
+        return jsonify({"error": "NO API KEY"}), 200
+
+    response = requests.get('https://malshare.com/api.php?api_key=%s&action=details&hash=%s' % (config.MALSHARE_APIKEY, hash_),
+                            headers={'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'gzip,  Linux Expl0rer'})
 
     return jsonify(response.json() if not response.text.startswith('Sample not found by hash (') else response.text), response.status_code
 

@@ -15,13 +15,16 @@
                 $('#malshare_' + d.pid).html("searching...");
                 $('#otx_' + d.pid).html("searching...");
 
-                /* --- Search in VirusTotal and OTX --- */
+                /* --- Search in VirusTotal, OTX and Malshare --- */
                 MalShare_search(sha256, function(data) {
-                    if (data['response_code'] == 1) {
+                    if (data['response_code'] === 1) {
                         $("#malshare_" + d.pid).html("<a href=\"https://malshare.com/sample.php?action=detail&hash=" + sha256 + "\" target=\"_blank\">report (found)</a>");
                     } else {
                         $("#malshare_" + d.pid).html("<a href=\"https://malshare.com/sample.php?action=detail&hash=" + sha256 + "\" target=\"_blank\">not found</a>");
                     }
+                },
+                function (error_str) {
+                    $("#malshare_" + d.pid).html(error_str)
                 });
 
                 VT_search(sha256, function(data) {

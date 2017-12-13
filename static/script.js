@@ -9,15 +9,15 @@ function hash(path, handler) {
     });
 }
 
-/* --- VirusTotal --- */
-function MalShare_search(sha256, handler, interval=5000) {
-    $.get("/malshare/sha256/" + sha256, function(data, status) {
-        if (status == "success") {
-            handler(data);
-        } else {
-            setTimeout(function () {
-                MalShare_search(sha256, handler, interval); // retry until success
-            }, interval);
+/* --- MalShare --- */
+function MalShare_search(sha256, handler, error) {
+    $.get("/malshare/" + sha256, function(data, status) {
+        if (status === "success") {
+            if (data.hasOwnProperty("error")) {
+                error(data["error"]);
+            } else {
+                handler(data);
+            }
         }
     });
 }

@@ -11,6 +11,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 * Automaticly search hash in public services
   * [VirusTotal](https://www.virustotal.com/#/home/upload)
   * [AlienVault OTX](https://otx.alienvault.com/)
+  * [MalShare](https://malshare.com/)
 ### users
 * users list
 ### find
