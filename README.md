@@ -35,6 +35,17 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 * YARA
 * chkrootkit
 
+## Prerequisites
+1. Install YARA
+```sh
+sudo apt-get install yara
+```
+
+2. Install chkrootkit
+```sh
+sudo apt-get install chkrootkit
+```
+
 ## Installation
 1. Clone repository
 ```sh
@@ -44,25 +55,6 @@ git clone https://github.com/intezer/linux_expl0rer
 2. Install required packages
 ```sh
 pip install -r requirements.txt
-```
-
-3. Setup VT/OTX api keys(optional)
-```sh
-nano config.py
-```
-Edit following lines:
-```py
-VT_APIKEY = '<key>'
-OTX_APIKEY = '<key>'
-MALSHARE_APIKEY = '<key>'
-```
-4. Install YARA
-```sh
-sudo apt-get install yara
-```
-5. Install chkrootkit
-```sh
-sudo apt-get install chkrootkit
 ```
 
 ## Start Linux Expl0rer server
@@ -76,7 +68,17 @@ chmod +x start_server.sh
 ```sh
 firefox http://127.0.0.1:8080
 ```
-2. do stuff
+
+## Setup VT/OTX api keys(optional)
+```sh
+nano config.py
+```
+Edit following lines:
+```py
+VT_APIKEY = '<key>'
+OTX_APIKEY = '<key>'
+MALSHARE_APIKEY = '<key>'
+```
 
 ## Notes
 * We recommend using NGINX [reverse proxy with basic http auth](https://www.nginx.com/resources/admin-guide/restricting-access-auth-basic/) & ssl for secure remote access
