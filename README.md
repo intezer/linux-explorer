@@ -67,7 +67,8 @@ sudo apt-get install chkrootkit
 
 ## Start Linux Expl0rer server
 ```sh
-sudo python linux_explorer.py
+chmod +x start_server.sh
+./start_server.sh
 ```
 
 ## Usage
