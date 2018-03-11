@@ -46,7 +46,7 @@ git clone https://github.com/intezer/linux_expl0rer
 pip install -r requirements.txt
 ```
 
-3. Setup VT/OTX api keys
+3. Setup VT/OTX api keys(optional)
 ```sh
 nano config.py
 ```
@@ -54,6 +54,7 @@ Edit following lines:
 ```py
 VT_APIKEY = '<key>'
 OTX_APIKEY = '<key>'
+MALSHARE_APIKEY = '<key>'
 ```
 4. Install YARA
 ```sh

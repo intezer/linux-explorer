@@ -1,3 +1,3 @@
-VT_APIKEY = '<KEY>'
-OTX_APIKEY = '' # optional
-MALSHARE_APIKEY = '' # optional
+VT_APIKEY       = ''
+OTX_APIKEY      = ''
+MALSHARE_APIKEY = ''

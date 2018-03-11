@@ -33,6 +33,8 @@
                     } else {
                         $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + sha256 + "\" target=\"_blank\">not found</a>");
                     }
+                }, function(error_str) {
+                    $("#vt_" + d.pid).html(error_str);
                 });
 
                 OTX_pulses("FileHash-SHA256", sha256, function(results) {

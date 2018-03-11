@@ -98,6 +98,9 @@ def fs_download():
 def vt_report(hash):
     ''' fetch VirusTotal report. Simple proxy to overcome same origin policy. '''
 
+    if not len(config.VT_APIKEY):
+        return jsonify({"error": "NO API KEY"}), 200
+
     response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params={'apikey': config.VT_APIKEY,
                                                                                        'resource': hash}, headers={'Accept-Encoding': 'gzip, deflate',
                                                                                                                    'User-Agent': 'gzip,  Linux Expl0rer'})
@@ -264,5 +267,5 @@ def chkrootkit():
     return render_template('chkrootkit.html'), 200
 
 if __name__=='__main__':
-    app.run('127.0.0.1', 8080, debug=False)
+    app.run('127.0.0.1', 8080, debug=True)
 
