@@ -31,7 +31,26 @@
                     if (data['response_code'] == 1) {
                         $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + sha256 + "\" target=\"_blank\">report (" + data["positives"] + "/" + data["total"] + ")</a>");
                     } else {
-                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + sha256 + "\" target=\"_blank\">not found</a>");
+                        // upload the file, sleep & then check again
+                         $("#vt_" + d.pid).html("uploading file...");
+
+                         VT_upload(d.exe, function(data){
+                                // retry to retrieve a report
+                                $("#vt_" + d.pid).html("file in queue...");
+
+                                VT_search(sha256, function(data) {
+                                    if (data['response_code'] == 1) {
+                                        $("#vt_" + d.pid).html("<a href=\"https://www.virustotal.com/#/file/" + sha256 + "\" target=\"_blank\">report (" + data["positives"] + "/" + data["total"] + ")</a>");
+                                    } else {
+                                        $("#vt_" + d.pid).html("unknown error!");
+                                    }
+                                }, function(error_str) {
+                                    $("#vt_" + d.pid).html(error_str);
+                                });
+
+                            }, function(error_str){
+                                $("#vt_" + d.pid).html(error_str);
+                         });
                     }
                 }, function(error_str) {
                     $("#vt_" + d.pid).html(error_str);

@@ -107,6 +107,25 @@ def vt_report(hash):
 
     return jsonify(response.json() if response.status_code == 200 else response.text), response.status_code
 
+@app.route('/vt/upload')
+def vt_upload():
+    if not len(config.VT_APIKEY):
+        return jsonify({"error": "NO API KEY"}), 200
+
+    path = request.args.get('path', '')
+
+    if not os.path.isfile(path):
+            return jsonify({"error": "%s is not a valid file or the system could not access it" % path}), 200
+
+    files = {'file': (os.path.basename(path), open(path, 'rb'))}
+
+    response = requests.post('https://www.virustotal.com/vtapi/v2/file/scan', params={'apikey': config.VT_APIKEY},
+                                                                              files=files,
+                                                                              headers={'Accept-Encoding': 'gzip, deflate',
+                                                                                       'User-Agent': 'gzip,  Linux Expl0rer'})
+
+    return jsonify(response.json() if response.status_code == 200 else response.text), response.status_code
+
 @app.route('/otx/<string:type>/<string:indicator>')
 def otx_report(type, indicator):
     ''' AlienVault Open Threat Exchange interface.
