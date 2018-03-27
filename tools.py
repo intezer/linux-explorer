@@ -59,21 +59,21 @@ class Tool(object):
 
 class YARA(Tool):
     def _is_installed(self):
-        return os.path.isfile('/usr/bin/yara')
+        return os.path.isfile('yara/yara')
 
     def set_cmdline(self, rule_file, dir='/', recursive=True, pid=None):
         if pid:
-            self._proc_cmdline = ['/usr/bin/yara', rule_file, pid]
+            self._proc_cmdline = ['yara/yara', rule_file, pid]
 
         else:
-            self._proc_cmdline = ['/usr/bin/yara'] + ['-r', rule_file, dir] if recursive else [rule_file, dir]
+            self._proc_cmdline = ['yara/yara'] + ['-r', rule_file, dir] if recursive else [rule_file, dir]
 
 class Chkrootkit(Tool):
     def _is_installed(self):
-        return os.path.isfile('/usr/sbin/chkrootkit')
+        return os.path.isfile('chkrootkit/chkrootkit')
 
     def set_cmdline(self):
-        self._proc_cmdline = ['/usr/sbin/chkrootkit']
+        self._proc_cmdline = ['chkrootkit/chkrootkit']
 
 class Find(Tool):
     def _is_installed(self):
