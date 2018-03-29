@@ -32,34 +32,12 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
   
 ## Requirements
 * Python 2.7
-* YARA
-* chkrootkit
-
-## Prerequisites
-1. Install YARA
-```sh
-sudo apt-get install yara
-```
-
-2. Install chkrootkit
-```sh
-sudo apt-get install chkrootkit
-```
 
 ## Installation
-1. Clone repository
 ```sh
-git clone https://github.com/intezer/linux_expl0rer
-```
-
-2. Install required packages
-```sh
-pip install -r requirements.txt
-```
-
-## Start Linux Expl0rer server
-```sh
-chmod +x start_server.sh
+wget https://github.com/intezer/linux-explorer/archive/master.zip -O master.zip
+unzip master.zip
+cd linux-explorer-master
 ./start_server.sh
 ```
 

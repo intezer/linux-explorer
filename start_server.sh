@@ -1,5 +1,11 @@
+#!/bin/bash
+
+is_first_run=false
+
 # ========================= Setup external tools =========================
 if [ ! -f yara/yara ] || [ ! -f chkrootkit/chkrootkit ] ; then
+
+    is_first_run=true
 
     if [ -f /etc/redhat-release ]; then
 
@@ -56,12 +62,44 @@ if [ ! -f chkrootkit/chkrootkit ] ; then
     rm master.tar.gz
     cd chkrootkit
     make sense
+    cd ..
 
 fi
 
+# ========================= Install Python pip if needed =========================
+if [ ! -x "$(command -v pip)" ] ; then
+    echo "pip not installed! installing pip..."
+
+    is_first_run=true
+
+    if [ -f /etc/redhat-release ]; then
+
+      sudo yum -y install gcc python-devel
+
+      wget "https://bootstrap.pypa.io/get-pip.py" -O "get-pip.py"
+      sudo python get-pip.py
+
+    fi
+
+    if [ -f /etc/lsb-release ]; then
+
+      sudo apt-get install python-pip
+
+    fi
+
+fi
+
+# ========================= 1st run =========================
+if [ "$is_first_run" = true ] ; then
+
+# ========================= Install requirements =========================
+    sudo pip install -r requirements.txt
+
 # ========================= Update YARA signatures =========================
-echo -e "\033[33m[*] fetching up-to-date yara signatures...\033[0m"
-./update_signatures.sh
+    echo -e "\033[33m[*] fetching up-to-date yara signatures...\033[0m"
+    ./update_signatures.sh
+
+fi
 
 # ========================= Start Linux Expl0rer =========================
 echo -e "\033[33m[*] starting Linux Expl0rer...\033[0m"
