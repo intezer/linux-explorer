@@ -163,14 +163,14 @@ def malshare_report(hash_):
 
 @app.route('/logs/<string:file>')
 def logs(file):
-    if file == "syslog":
-        log_path = "/var/log/syslog"
+    if file == "system":
+        log_path = "/var/log/syslog" if config.IS_UBUNTU else "/var/log/messages"
 
-    elif file == "auth":
-        log_path = "/var/log/auth.log"
+    elif file == "authentication":
+        log_path = "/var/log/auth.log" if config.IS_UBUNTU else "/var/log/secure"
 
-    elif file == "ufw":
-        log_path = "/var/log/ufw.log"
+    elif file == "firewall":
+        log_path = "/var/log/ufw.log" if config.IS_UBUNTU else "/var/log/firewalld"
 
     elif file == "bash":
         log_path = os.path.expanduser('~/.bash_history')
