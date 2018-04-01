@@ -38,7 +38,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 wget https://github.com/intezer/linux-explorer/archive/master.zip -O master.zip
 unzip master.zip
 cd linux-explorer-master
-./start_server.sh
+./deploy.sh
 ```
 
 ## Usage
