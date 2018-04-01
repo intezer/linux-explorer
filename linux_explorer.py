@@ -58,17 +58,26 @@ def process_gcore(pid):
 
         return None
 
-    core_file = dump('static/core_files', pid)
+    CORE_FILES = 'static/core_files'
+
+    if not os.path.exists(CORE_FILES):
+        os.mkdir(CORE_FILES)
+
+    core_file = dump(CORE_FILES, pid)
 
     return send_from_directory(directory='static/core_files', filename=core_file) # add error check/log
 
 @app.route('/mem/<int:pid>/strings')
 def mem_strings(pid):
+    STRINGS = 'static/strings'
+    if not os.path.exists(STRINGS):
+        os.mkdir(STRINGS)
+
     start = request.args.get('start', '')
     end = request.args.get('end', '')
     filename = "%s.%s_%s" % (pid, start, end)
-    dump_file = os.path.join('static', 'strings', filename + ".dmp")
-    strings_file = os.path.join('static', 'strings', filename + ".strings")
+    dump_file = os.path.join(STRINGS, filename + ".dmp")
+    strings_file = os.path.join(STRINGS, filename + ".strings")
 
     def dump(pid, start, end, output_file):
         os.system('gdb --batch --pid %d -ex \"dump memory %s 0x%s 0x%s\"' % (pid, output_file, start, end))
@@ -81,7 +90,7 @@ def mem_strings(pid):
 
     os.remove(dump_file)
 
-    return send_from_directory(directory='static/strings', filename=filename + '.strings', as_attachment=True)
+    return send_from_directory(directory=STRINGS, filename=filename + '.strings', as_attachment=True)
 
 @app.route('/fs/hash')
 def fs_hash():
