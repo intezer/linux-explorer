@@ -108,7 +108,9 @@ fi
 if [ "$is_first_run" = true ] ; then
 
 # ========================= Install requirements =========================
+    # First try to install while ignoring conflicts in order to avoid any errors
     sudo python3 -m pip install --ignore-installed -r requirements.txt
+    sudo python3 -m pip install -r requirements.txt
 
 # ========================= Update YARA signatures =========================
     echo -e "\033[33m[*] fetching up-to-date yara signatures...\033[0m"

@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 
 from OTXv2 import OTXv2
 import IndicatorTypes
+from intezer_sdk import api, errors
+from intezer_sdk.analysis import Analysis
 
 app = Flask(__name__)
 
@@ -134,6 +136,29 @@ def vt_upload():
                                                                                        'User-Agent': 'gzip,  Linux Expl0rer'})
 
     return jsonify(response.json() if response.status_code == 200 else response.text), response.status_code
+
+
+@app.route('/intezer/upload')
+def intezer_upload():
+    if not len(config.INTEZER_APIKEY):
+        return jsonify({"error": "NO API KEY"}), 200
+
+    path = request.args.get('path', '')
+
+    if not os.path.isfile(path):
+        return jsonify({"error": "%s is not a valid file or the system could not access it" % path}), 200
+
+    try:
+        api.set_global_api(config.INTEZER_APIKEY)
+        analysis = Analysis(file_path=path,
+                            dynamic_unpacking=None,
+                            static_unpacking=None)
+
+        analysis.send(True)
+    except errors.IntezerError as e:
+        return jsonify({"error": "Error occurred: " + e.args[0]}), 200
+
+    return jsonify(analysis.result()), 200
 
 @app.route('/otx/<string:type>/<string:indicator>')
 def otx_report(type, indicator):
