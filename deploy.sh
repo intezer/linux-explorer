@@ -91,8 +91,7 @@ if [ ! -x "$(command -v pip3)" ] && [ ! -x "$(command -v pip3.6)" ]; then
     if [ -f /etc/redhat-release ]; then
 
       sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
-      sudo yum -y install gcc python36-devel python36u-pip
-      sudo ln -s /usr/bin/python3.6 /usr/bin/python3
+      sudo yum -y install gcc python36-devel python36-pip
 
     fi
 
