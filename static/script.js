@@ -54,6 +54,19 @@ function VT_upload(path, handler, error) {
     });
 }
 
+/* --- Intezer Analyze --- */
+function Intezer_upload(path, handler, error) {
+    $.get("/intezer/upload", { "path": path }, function(data, status) {
+        if (status == "success") {
+            if(data.hasOwnProperty("error")) {
+                error(data["error"]);
+            } else {
+                handler(data);
+            }
+        }
+    });
+}
+
 /* --- Open Threat Exchange --- */
 function OTX_pulses(type, indicator, handler, error) {
     $.get("/otx/" + type + "/" + indicator, function (data, status) {

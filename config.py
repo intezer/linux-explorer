@@ -1,11 +1,8 @@
 # config.py
 
-import sys
 import platform
 
-reload(sys) # fix encoding issues
-sys.setdefaultencoding('utf8')
-
+INTEZER_APIKEY  = ''
 VT_APIKEY       = ''
 OTX_APIKEY      = ''
 MALSHARE_APIKEY = ''

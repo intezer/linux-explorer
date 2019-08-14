@@ -10,6 +10,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 * Dump process memory in one click
 * Automaticly search hash in public services
   * [VirusTotal](https://www.virustotal.com/#/home/upload)
+  * [Intezer Analyze](https://analyze.intezer.com)
   * [AlienVault OTX](https://otx.alienvault.com/)
   * [MalShare](https://malshare.com/)
 ### users

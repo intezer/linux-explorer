@@ -54,6 +54,22 @@ fi
 
 if [ ! -f chkrootkit/chkrootkit ] ; then
 
+    if [ -f /etc/redhat-release ]; then
+      echo "Installing dependencies for chkrootkit/CentOS..."
+
+      # NETSTAT
+      sudo yum -y install net-tools
+
+    fi
+
+    if [ -f /etc/lsb-release ]; then
+      echo "Installing dependencies for chkrootkit/Ubuntu..."
+
+      # NETSTAT
+      sudo apt-get install -y net-tools
+
+    fi
+
     # Build chkrootkit from source
     rm master.tar.gz
     wget https://github.com/omri9741/chkrootkit/archive/master.tar.gz -O master.tar.gz
@@ -67,23 +83,21 @@ if [ ! -f chkrootkit/chkrootkit ] ; then
 fi
 
 # ========================= Install Python pip if needed =========================
-if [ ! -x "$(command -v pip)" ] ; then
-    echo "pip not installed! installing pip..."
+if [ ! -x "$(command -v pip3)" ] && [ ! -x "$(command -v pip3.6)" ]; then
+    echo "python3/pip not installed! installing pip..."
 
     is_first_run=true
 
     if [ -f /etc/redhat-release ]; then
 
-      sudo yum -y install gcc python-devel
-
-      wget "https://bootstrap.pypa.io/get-pip.py" -O "get-pip.py"
-      sudo python get-pip.py
+      sudo yum -y install https://centos7.iuscommunity.org/ius-release.rpm
+      sudo yum -y install gcc python36-devel python36-pip
 
     fi
 
     if [ -f /etc/lsb-release ]; then
 
-      sudo apt-get install python-pip
+      sudo apt-get install -y python3 python3-pip
 
     fi
 
@@ -93,7 +107,9 @@ fi
 if [ "$is_first_run" = true ] ; then
 
 # ========================= Install requirements =========================
-    sudo pip install -r requirements.txt
+    # First try to install while ignoring conflicts in order to avoid any errors
+    sudo python3 -m pip install --ignore-installed -r requirements.txt
+    sudo python3 -m pip install -r requirements.txt
 
 # ========================= Update YARA signatures =========================
     echo -e "\033[33m[*] fetching up-to-date yara signatures...\033[0m"
@@ -103,4 +119,4 @@ fi
 
 # ========================= Start Linux Expl0rer =========================
 echo -e "\033[33m[*] starting Linux Expl0rer...\033[0m"
-sudo python linux_explorer.py
+sudo python3 linux_explorer.py

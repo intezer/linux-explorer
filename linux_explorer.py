@@ -11,10 +11,12 @@ import config
 import tools
 
 from flask import Flask, jsonify, send_file, send_from_directory, render_template, request, abort, redirect
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 
 from OTXv2 import OTXv2
 import IndicatorTypes
+from intezer_sdk import api, errors
+from intezer_sdk.analysis import Analysis
 
 app = Flask(__name__)
 
@@ -35,15 +37,15 @@ def processes():
 def processes_list():
     ''' process list, kthreads filtered out. '''
 
-    return jsonify({'data': filter(lambda pinfo: pinfo['pid'] != 2 and pinfo['ppid'] != 2, map(lambda pinfo: pinfo.as_dict(), psutil.process_iter()))}), 200
+    return jsonify({'data': list(filter(lambda pinfo: pinfo['pid'] != 2 and pinfo['ppid'] != 2, map(lambda pinfo: pinfo.as_dict(), psutil.process_iter())))}), 200
 
 @app.route('/processes/<int:pid>/memory_map')
 def process_memory_map(pid):
-    return jsonify({'data': map(lambda pmmap_ext: pmmap_ext._asdict(), psutil.Process(pid).memory_maps(grouped=False))}), 200
+    return jsonify({'data': list(map(lambda pmmap_ext: pmmap_ext._asdict(), psutil.Process(pid).memory_maps(grouped=False)))}), 200
 
 @app.route('/processes/<int:pid>/connections')
 def process_connections(pid):
-    return jsonify({'data': map(lambda pconn: pconn._asdict(), psutil.Process(pid).connections())}), 200
+    return jsonify({'data': list(map(lambda pconn: pconn._asdict(), psutil.Process(pid).connections()))}), 200
 
 @app.route('/processes/<int:pid>/core_file')
 def process_gcore(pid):
@@ -135,6 +137,29 @@ def vt_upload():
 
     return jsonify(response.json() if response.status_code == 200 else response.text), response.status_code
 
+
+@app.route('/intezer/upload')
+def intezer_upload():
+    if not len(config.INTEZER_APIKEY):
+        return jsonify({"error": "NO API KEY"}), 200
+
+    path = request.args.get('path', '')
+
+    if not os.path.isfile(path):
+        return jsonify({"error": "%s is not a valid file or the system could not access it" % path}), 200
+
+    try:
+        api.set_global_api(config.INTEZER_APIKEY)
+        analysis = Analysis(file_path=path,
+                            dynamic_unpacking=None,
+                            static_unpacking=None)
+
+        analysis.send(True)
+    except errors.IntezerError as e:
+        return jsonify({"error": "Error occurred: " + e.args[0]}), 200
+
+    return jsonify(analysis.result()), 200
+
 @app.route('/otx/<string:type>/<string:indicator>')
 def otx_report(type, indicator):
     ''' AlienVault Open Threat Exchange interface.
@@ -188,7 +213,7 @@ def logs(file):
         abort(404)
 
     if os.path.isfile(log_path):
-        with open(log_path, 'rb') as fh:
+        with open(log_path, 'r') as fh:
             log_data = fh.read()
 
     else:
@@ -202,7 +227,7 @@ def netstat():
 
 @app.route('/netstat/raw')
 def netstat_raw():
-    return jsonify({'data': map(lambda sconn: sconn._asdict(), psutil.net_connections())}), 200
+    return jsonify({'data': list(map(lambda sconn: sconn._asdict(), psutil.net_connections()))}), 200
 
 @app.route('/sh')
 def sh():
@@ -214,7 +239,7 @@ def shell():
 
 @app.route('/yara')
 def yara():
-    return render_template('yara.html', ruleset_files=map(lambda x: x.split('.yar')[0], os.listdir('yara_rules'))), 200
+    return render_template('yara.html', ruleset_files=list(map(lambda x: x.split('.yar')[0], os.listdir('yara_rules')))), 200
 
 @app.route('/yara/upload', methods=['GET','POST'])
 def yara_upload():
@@ -281,8 +306,8 @@ def users():
 
 @app.route('/users/list')
 def users_list():
-    with open('/etc/passwd', 'rb') as fh:
-        users = map(lambda line: line.split(':'), fh.readlines())
+    with open('/etc/passwd', 'r') as fh:
+        users = list(map(lambda line: line.split(':'), fh.readlines()))
 
     return jsonify({'data': users}), 200
 

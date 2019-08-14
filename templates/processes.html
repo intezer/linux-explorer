@@ -4,16 +4,28 @@
 
     <script type="application/javascript">
 
+        function upload_to_intezer(pid, path) {
+            $("#intezer_" + pid).html("analyzing file...");
+
+            Intezer_upload(path, function(data){
+                var response = data["sub_verdict"];
+
+                if ("family_name" in data) {
+                    response = response + " [" + data["family_name"] + "]";
+                }
+
+                $("#intezer_" + pid).html("<a href=" + data["analysis_url"] + " target=\"_blank\">report (" + response + ")</a>");
+            }, function(error_str){
+                $("#intezer_" + pid).html(error_str);
+            });
+        }
+
         function format ( d ) {
 
             hash(d.exe, function(md5, sha256) {
 
                 $('#md5_' + d.pid).html(md5);
                 $('#sha256_' + d.pid).html(sha256);
-
-                $('#vt_' + d.pid).html("searching...");
-                $('#malshare_' + d.pid).html("searching...");
-                $('#otx_' + d.pid).html("searching...");
 
                 /* --- Search in VirusTotal, OTX and Malshare --- */
                 MalShare_search(sha256, function(data) {
@@ -56,6 +68,7 @@
                     $("#vt_" + d.pid).html(error_str);
                 });
 
+
                 OTX_pulses("FileHash-SHA256", sha256, function(results) {
                     var arr = $.map(results, function(val, i) {
                         return OTX_link(val);
@@ -69,6 +82,8 @@
                 }, function(error_str) {
                     $("#otx_" + d.pid).html(error_str);
                 });
+
+
             });
 
             // create html table from connections list
@@ -112,16 +127,20 @@
                            '<td>exe:</td>'+
                            '<td>'+d.exe+' | <a href="/fs/download?path=' + d.exe + '">download</a></td>'+
                        '<tr>'+
+                           '<td>Intezer Analyze:</td>'+
+                           '<td id="intezer_' + d.pid + '"><a onclick="upload_to_intezer(' + d.pid + ',\'' + d.exe + '\')" href="javascript:void(0);">upload</a></td>'+
+                       '</tr>'+
+                       '<tr>'+
                            '<td>MalShare:</td>'+
-                           '<td id="malshare_' + d.pid + '">-</td>'+
+                           '<td id="malshare_' + d.pid + '">searching...</td>'+
                        '</tr>'+
                        '<tr>'+
                            '<td>VirusTotal:</td>'+
-                           '<td id="vt_' + d.pid + '">-</td>'+
+                           '<td id="vt_' + d.pid + '">searching...</td>'+
                        '</tr>'+
                        '<tr>'+
                            '<td>AlienVault OTX:</td>'+
-                           '<td id="otx_' + d.pid + '">-</td>'+
+                           '<td id="otx_' + d.pid + '">searching...</td>'+
                        '</tr>'+
                        '<tr>'+
                            '<td>md5:</td>'+
