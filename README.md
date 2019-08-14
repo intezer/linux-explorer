@@ -8,7 +8,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 * View full process list
 * Inspect process memory map & fetch memory strings easly
 * Dump process memory in one click
-* Automaticly search hash in public services
+* Automatically search hash in public services
   * [VirusTotal](https://www.virustotal.com/#/home/upload)
   * [Intezer Analyze](https://analyze.intezer.com)
   * [AlienVault OTX](https://otx.alienvault.com/)
@@ -54,7 +54,7 @@ nano config.py
 ```
 Edit following lines:
 ```py
-INTEZER_ANALYZE = '<key>'
+INTEZER_APIKEY = '<key>'
 VT_APIKEY = '<key>'
 OTX_APIKEY = '<key>'
 MALSHARE_APIKEY = '<key>'
