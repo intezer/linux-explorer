@@ -48,7 +48,7 @@ cd linux-explorer-master
 firefox http://127.0.0.1:8080
 ```
 
-## Setup VT/OTX api keys(optional)
+## Configure API keys (optional)
 ```sh
 nano config.py
 ```
