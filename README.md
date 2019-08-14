@@ -32,7 +32,7 @@ Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask
 * Upload your own YARA signature
   
 ## Requirements
-* Python 2.7
+* Python 3.6
 
 ## Installation
 ```sh
@@ -54,6 +54,7 @@ nano config.py
 ```
 Edit following lines:
 ```py
+INTEZER_ANALYZE = '<key>'
 VT_APIKEY = '<key>'
 OTX_APIKEY = '<key>'
 MALSHARE_APIKEY = '<key>'
@@ -65,3 +66,4 @@ MALSHARE_APIKEY = '<key>'
 
 ## Misc
 * ["How to get a VirusTotal public API Key"](https://community.mcafee.com/docs/DOC-6456)
+* ["To get an API Key for Intezer Analyze"](https://analyze.intezer.com/#/create-account)
