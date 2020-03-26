@@ -1,22 +1,29 @@
 # linux_explorer.py
 
-import psutil
-import os
-import time
 import hashlib
-import requests
+import os
 import subprocess
+import time
+
+import IndicatorTypes
+import psutil
+import requests
+from OTXv2 import OTXv2
+from flask import Flask
+from flask import abort
+from flask import jsonify
+from flask import redirect
+from flask import render_template
+from flask import request
+from flask import send_file
+from flask import send_from_directory
+from intezer_sdk import api
+from intezer_sdk import errors
+from intezer_sdk.analysis import Analysis
+from werkzeug.utils import secure_filename
 
 import config
 import tools
-
-from flask import Flask, jsonify, send_file, send_from_directory, render_template, request, abort, redirect
-from werkzeug.utils import secure_filename
-
-from OTXv2 import OTXv2
-import IndicatorTypes
-from intezer_sdk import api, errors
-from intezer_sdk.analysis import Analysis
 
 app = Flask(__name__)
 
@@ -29,23 +36,30 @@ toolbox = dict({'yara': tools.YARA(),
 def index():
     return redirect('/processes')
 
+
 @app.route('/processes')
 def processes():
     return render_template('processes.html'), 200
+
 
 @app.route('/processes/list')
 def processes_list():
     ''' process list, kthreads filtered out. '''
 
-    return jsonify({'data': list(filter(lambda pinfo: pinfo['pid'] != 2 and pinfo['ppid'] != 2, map(lambda pinfo: pinfo.as_dict(), psutil.process_iter())))}), 200
+    return jsonify({'data': list(filter(lambda pinfo: pinfo['pid'] != 2 and pinfo['ppid'] != 2,
+                                        map(lambda pinfo: pinfo.as_dict(), psutil.process_iter())))}), 200
+
 
 @app.route('/processes/<int:pid>/memory_map')
 def process_memory_map(pid):
-    return jsonify({'data': list(map(lambda pmmap_ext: pmmap_ext._asdict(), psutil.Process(pid).memory_maps(grouped=False)))}), 200
+    return jsonify(
+        {'data': list(map(lambda pmmap_ext: pmmap_ext._asdict(), psutil.Process(pid).memory_maps(grouped=False)))}), 200
+
 
 @app.route('/processes/<int:pid>/connections')
 def process_connections(pid):
     return jsonify({'data': list(map(lambda pconn: pconn._asdict(), psutil.Process(pid).connections()))}), 200
+
 
 @app.route('/processes/<int:pid>/core_file')
 def process_gcore(pid):
@@ -53,7 +67,7 @@ def process_gcore(pid):
 
         timestamp = str(int(time.time()))
 
-        if not os.system('gcore -o %s %d' % (os.path.join(folder, timestamp), pid)): # check for free space before
+        if not os.system('gcore -o %s %d' % (os.path.join(folder, timestamp), pid)):  # check for free space before
             for filename in os.listdir(folder):
                 if filename.startswith(timestamp):
                     return filename
@@ -67,7 +81,8 @@ def process_gcore(pid):
 
     core_file = dump(CORE_FILES, pid)
 
-    return send_from_directory(directory='static/core_files', filename=core_file) # add error check/log
+    return send_from_directory(directory='static/core_files', filename=core_file)  # add error check/log
+
 
 @app.route('/mem/<int:pid>/strings')
 def mem_strings(pid):
@@ -94,16 +109,19 @@ def mem_strings(pid):
 
     return send_from_directory(directory=STRINGS, filename=filename + '.strings', as_attachment=True)
 
+
 @app.route('/fs/hash')
 def fs_hash():
     md5 = hashlib.md5(open(request.args.get('path', ''), 'rb').read()).hexdigest()
-    sha256= hashlib.sha256(open(request.args.get('path', ''), 'rb').read()).hexdigest()
+    sha256 = hashlib.sha256(open(request.args.get('path', ''), 'rb').read()).hexdigest()
 
     return jsonify({'md5': md5, 'sha256': sha256}), 200
+
 
 @app.route('/fs/download')
 def fs_download():
     return send_file(request.args.get('path', ''), as_attachment=True)
+
 
 @app.route('/vt/report/<string:hash>')
 def vt_report(hash):
@@ -113,10 +131,12 @@ def vt_report(hash):
         return jsonify({"error": "NO API KEY"}), 200
 
     response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params={'apikey': config.VT_APIKEY,
-                                                                                       'resource': hash}, headers={'Accept-Encoding': 'gzip, deflate',
-                                                                                                                   'User-Agent': 'gzip,  Linux Expl0rer'})
+                                                                                       'resource': hash},
+                            headers={'Accept-Encoding': 'gzip, deflate',
+                                     'User-Agent': 'gzip,  Linux Expl0rer'})
 
     return jsonify(response.json() if response.status_code == 200 else response.text), response.status_code
+
 
 @app.route('/vt/upload')
 def vt_upload():
@@ -126,14 +146,14 @@ def vt_upload():
     path = request.args.get('path', '')
 
     if not os.path.isfile(path):
-            return jsonify({"error": "%s is not a valid file or the system could not access it" % path}), 200
+        return jsonify({"error": "%s is not a valid file or the system could not access it" % path}), 200
 
     files = {'file': (os.path.basename(path), open(path, 'rb'))}
 
     response = requests.post('https://www.virustotal.com/vtapi/v2/file/scan', params={'apikey': config.VT_APIKEY},
-                                                                              files=files,
-                                                                              headers={'Accept-Encoding': 'gzip, deflate',
-                                                                                       'User-Agent': 'gzip,  Linux Expl0rer'})
+                             files=files,
+                             headers={'Accept-Encoding': 'gzip, deflate',
+                                      'User-Agent': 'gzip,  Linux Expl0rer'})
 
     return jsonify(response.json() if response.status_code == 200 else response.text), response.status_code
 
@@ -160,6 +180,7 @@ def intezer_upload():
 
     return jsonify(analysis.result()), 200
 
+
 @app.route('/otx/<string:type>/<string:indicator>')
 def otx_report(type, indicator):
     ''' AlienVault Open Threat Exchange interface.
@@ -181,6 +202,7 @@ def otx_report(type, indicator):
 
     return jsonify(otx.get_indicator_details_full(find_by_type(type), indicator)), 200
 
+
 @app.route('/malshare/<string:hash_>')
 def malshare_report(hash_):
     ''' MalShare repository.
@@ -189,10 +211,12 @@ def malshare_report(hash_):
     if not len(config.MALSHARE_APIKEY):
         return jsonify({"error": "NO API KEY"}), 200
 
-    response = requests.get('https://malshare.com/api.php?api_key=%s&action=details&hash=%s' % (config.MALSHARE_APIKEY, hash_),
-                            headers={'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'gzip,  Linux Expl0rer'})
+    response = requests.get(
+        'https://malshare.com/api.php?api_key=%s&action=details&hash=%s' % (config.MALSHARE_APIKEY, hash_),
+        headers={'Accept-Encoding': 'gzip, deflate', 'User-Agent': 'gzip,  Linux Expl0rer'})
 
-    return jsonify(response.json() if not response.text.startswith('Sample not found by hash (') else response.text), response.status_code
+    return jsonify(response.json() if not response.text.startswith(
+        'Sample not found by hash (') else response.text), response.status_code
 
 
 @app.route('/logs/<string:file>')
@@ -221,43 +245,52 @@ def logs(file):
 
     return render_template('logs_view.html', text=log_data), 200
 
+
 @app.route('/netstat')
 def netstat():
     return render_template('netstat.html'), 200
+
 
 @app.route('/netstat/raw')
 def netstat_raw():
     return jsonify({'data': list(map(lambda sconn: sconn._asdict(), psutil.net_connections()))}), 200
 
+
 @app.route('/sh')
 def sh():
     return render_template('sh.html'), 200
 
+
 @app.route('/sh/exec')
 def shell():
-    return subprocess.Popen(request.args.get('cmdline', ''), shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]
+    return subprocess.Popen(request.args.get('cmdline', ''), shell=True, stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT).communicate()[0]
+
 
 @app.route('/yara')
 def yara():
-    return render_template('yara.html', ruleset_files=list(map(lambda x: x.split('.yar')[0], os.listdir('yara_rules')))), 200
+    return render_template('yara.html',
+                           ruleset_files=list(map(lambda x: x.split('.yar')[0], os.listdir('yara_rules')))), 200
 
-@app.route('/yara/upload', methods=['GET','POST'])
+
+@app.route('/yara/upload', methods=['GET', 'POST'])
 def yara_upload():
     if request.method == 'POST':
         request.files['file'].save(os.path.join('yara_rules', secure_filename(request.files['file'].filename)))
 
     return redirect("/yara", code=302)
 
+
 @app.route('/tools/<string:tool>/run')
 def tools_run(tool):
     if tool == 'yara':
         if request.args.get('pid', None):
             toolbox['yara'].set_cmdline('yara_rules/' + request.args.get('rules_file', '') + '.yar',
-                                                      request.args.get('pid', ''))
+                                        request.args.get('pid', ''))
         else:
             toolbox['yara'].set_cmdline('yara_rules/' + request.args.get('rules_file', '') + '.yar',
-                                                      request.args.get('dir', ''),
-                                                      request.args.get('recursive', 'true') == 'true')
+                                        request.args.get('dir', ''),
+                                        request.args.get('recursive', 'true') == 'true')
 
         toolbox['yara'].run()
 
@@ -267,7 +300,7 @@ def tools_run(tool):
 
     elif tool == 'find':
         toolbox['find'].set_cmdline(request.args.get('dir', ''),
-                                                  request.args.get('name', ''))
+                                    request.args.get('name', ''))
 
         toolbox['find'].run()
 
@@ -275,6 +308,7 @@ def tools_run(tool):
         abort(404)
 
     return "", 200
+
 
 @app.route('/tools/<string:tool>/status')
 def tools_status(tool):
@@ -291,6 +325,7 @@ def tools_results(tool):
 
     return toolbox[tool].results(), 200
 
+
 @app.route('/tools/<string:tool>/stop')
 def tools_stop(tool):
     if tool not in toolbox:
@@ -300,9 +335,11 @@ def tools_stop(tool):
 
     return "", 200
 
+
 @app.route('/users')
 def users():
     return render_template('users.html'), 200
+
 
 @app.route('/users/list')
 def users_list():
@@ -311,14 +348,16 @@ def users_list():
 
     return jsonify({'data': users}), 200
 
+
 @app.route('/files')
 def files():
     return render_template('files.html'), 200
+
 
 @app.route('/chkrootkit')
 def chkrootkit():
     return render_template('chkrootkit.html'), 200
 
-if __name__=='__main__':
-    app.run('127.0.0.1', 8080, debug=True)
 
+if __name__ == '__main__':
+    app.run('127.0.0.1', 8080, debug=True)

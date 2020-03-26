@@ -1,6 +1,7 @@
-Flask==0.12.4
+Flask==1.1.1
 OTXv2==1.2
-psutil==5.4.1
-requests==2.22.0
-simplejson==3.12.0
-intezer-sdk==0.14
+psutil==5.7.0
+requests==2.23.0
+simplejson==3.17.0
+intezer-sdk==1.1.1
+distro==1.4.0
