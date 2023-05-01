@@ -1,4 +1,4 @@
-Flask==1.1.1
+Flask==2.3.2
 OTXv2==1.2
 psutil==5.7.0
 requests==2.23.0
