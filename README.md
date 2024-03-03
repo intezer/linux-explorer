@@ -1,3 +1,5 @@
+# This project is no longer maintained!
+
 # Linux Expl0rer
 Easy-to-use live forensics toolbox for Linux endpoints written in Python & Flask.
 
